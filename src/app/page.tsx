@@ -51,6 +51,7 @@ const previews: LanguagePreview[] = [
 ];
 
 const bentoLanguageTabs = ["EN", "HI", "JP", "DE", "AR"];
+const particleTones = ["bg-primary", "bg-emerald-400", "bg-amber-400", "bg-rose-400/90", "bg-foreground/70"];
 
 function useTheme() {
   const [isDark, setIsDark] = useState(() => {
@@ -74,25 +75,32 @@ function useTheme() {
 }
 
 function ParticleField() {
+  const pseudo = (value: number) => {
+    const x = Math.sin(value * 12.9898) * 43758.5453;
+    return x - Math.floor(x);
+  };
+
   const particles = useMemo(
     () =>
-      Array.from({ length: 30 }).map((_, index) => {
-        const tone =
-          index % 4 === 0
-            ? "bg-primary/26"
-            : index % 4 === 1
-              ? "bg-emerald-400/18"
-              : index % 4 === 2
-                ? "bg-amber-400/18"
-                : "bg-rose-400/18";
+      Array.from({ length: 320 }).map((_, index) => {
+        const tone = particleTones[index % particleTones.length];
+        const size = 1.5 + pseudo(index + 4) * 3.2;
+        const left = -20 - pseudo(index + 11) * 35;
+        const top = pseudo(index + 27) * 100;
+        const driftY = (pseudo(index + 52) - 0.5) * 26;
+        const duration = 10 + pseudo(index + 100) * 10;
+        const pulseDuration = 2.4 + pseudo(index + 74) * 4;
+        const delay = pseudo(index + 88) * duration;
 
         return {
           id: index,
-          left: (index * 37) % 100,
-          top: (index * 19) % 100,
-          size: index % 5 === 0 ? 5 : 3,
-          delay: (index % 10) * 0.4,
-          duration: 10 + (index % 7),
+          left,
+          top,
+          size,
+          delay,
+          duration,
+          pulseDuration,
+          driftY,
           tone,
         };
       }),
@@ -107,16 +115,17 @@ function ParticleField() {
       {particles.map((particle) => (
         <span
           key={particle.id}
-          className={`particle-drift absolute rounded-full ${particle.tone}`}
+          className={`absolute rounded-full ${particle.tone}`}
           style={{
+            "--dy": `${particle.driftY}px`,
             left: `${particle.left}%`,
             top: `${particle.top}%`,
             width: `${particle.size}px`,
             height: `${particle.size}px`,
-            animationDelay: `${particle.delay}s`,
-            animationDuration: `${particle.duration}s`,
-            opacity: 0.2,
-          }}
+            boxShadow: "0 0 10px rgba(190,140,255,0.16)",
+            animation: `particleAcross ${particle.duration}s linear ${particle.delay * -1}s infinite, softPulse ${particle.pulseDuration}s ease-in-out ${particle.delay}s infinite`,
+            opacity: 0.36,
+          } as React.CSSProperties}
         />
       ))}
     </div>
@@ -124,51 +133,40 @@ function ParticleField() {
 }
 
 function WorldMapArt() {
+  const nodes = [
+    { code: "US", left: "18%", top: "44%", tone: "bg-primary" },
+    { code: "BR", left: "30%", top: "66%", tone: "bg-emerald-400" },
+    { code: "DE", left: "49%", top: "39%", tone: "bg-amber-400" },
+    { code: "IN", left: "63%", top: "50%", tone: "bg-rose-400" },
+    { code: "JP", left: "79%", top: "43%", tone: "bg-primary" },
+    { code: "AE", left: "58%", top: "52%", tone: "bg-emerald-400" },
+  ];
+
   return (
-    <div className="relative h-72 overflow-hidden rounded-3xl border border-border/80 glass">
-      <svg viewBox="0 0 900 360" className="h-full w-full opacity-70" aria-hidden>
-        <path
-          d="M95 165l48-29 56 4 58-18 82 12 84-32 90 20 61 56-34 26-93-6-62 25-88-5-73 14-75-20z"
-          fill="currentColor"
-          className="text-muted"
-        />
-        <path
-          d="M638 109l42-8 58 12 44 24-6 41-43 19-61-9-32-33z"
-          fill="currentColor"
-          className="text-muted"
-        />
-        <path
-          d="M320 226l70 10 70 45-43 23-56-16-39-30z"
-          fill="currentColor"
-          className="text-muted"
-        />
-        <path
-          d="M191 141C315 48 509 46 706 131"
-          stroke="currentColor"
-          strokeWidth="2"
-          className="text-primary/60"
-          strokeDasharray="6 8"
-        />
-        <path
-          d="M251 198C388 129 500 122 651 173"
-          stroke="currentColor"
-          strokeWidth="2"
-          className="text-emerald-400/55"
-          strokeDasharray="6 8"
-        />
+    <div className="relative h-80 overflow-hidden rounded-3xl border border-border/80 glass">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(190,140,255,0.18),transparent_45%),radial-gradient(circle_at_70%_80%,rgba(16,185,129,0.12),transparent_45%)]" />
+
+      <svg viewBox="0 0 1200 500" className="relative z-10 h-full w-full p-8 opacity-80" aria-hidden>
+        <g className="text-muted/80">
+          <path d="M95 247l41-41 89-10 42-30 75 8 57-24 99 30 44 40-19 30-66 7-47 24-52 3-61 34-60 7-75-15-52-27z" fill="currentColor" />
+          <path d="M366 305l40-23 69 6 47 27 21 35-12 26-39 11-56-14-47-35-19-20z" fill="currentColor" />
+          <path d="M595 168l52-22 102 6 67 30 39 45-16 34-58 20-80-10-62-35-32-36z" fill="currentColor" />
+          <path d="M818 153l52-14 99 16 83 46 25 38-12 41-69 26-87-13-54-38-33-45z" fill="currentColor" />
+          <path d="M913 327l47-9 52 16 28 32-26 26-49-5-42-25z" fill="currentColor" />
+        </g>
+
+        <g fill="none" strokeWidth="2.2" strokeLinecap="round">
+          <path d="M215 223C350 132 513 128 648 190C756 241 836 228 945 188" className="text-primary/70" stroke="currentColor" strokeDasharray="8 8" style={{ animation: "routeFlow 10s linear infinite" }} />
+          <path d="M226 246C340 269 447 331 607 321C744 314 862 278 968 210" className="text-emerald-400/70" stroke="currentColor" strokeDasharray="7 9" style={{ animation: "routeFlow 9s linear infinite" }} />
+          <path d="M646 197C640 258 608 278 596 316" className="text-amber-400/80" stroke="currentColor" strokeDasharray="5 7" style={{ animation: "routeFlow 7.5s linear infinite" }} />
+        </g>
       </svg>
-      {[
-        ["bg-primary", 230, 140],
-        ["bg-emerald-400", 335, 128],
-        ["bg-amber-400", 470, 118],
-        ["bg-rose-400", 620, 148],
-        ["bg-primary", 384, 230],
-      ].map(([tone, left, top], index) => (
-        <span
-          key={index}
-          className={`absolute h-3 w-3 rounded-full ${tone}`}
-          style={{ left: Number(left), top: Number(top), animation: `softPulse 3s ${index * 0.4}s infinite` }}
-        />
+
+      {nodes.map((node, index) => (
+        <div key={node.code} className="absolute z-20" style={{ left: node.left, top: node.top }}>
+          <span className={`block h-2.5 w-2.5 rounded-full ${node.tone}`} style={{ animation: `softPulse 2.4s ${index * 0.35}s infinite` }} />
+          <span className="mt-1 block text-[10px] font-medium text-muted-foreground">{node.code}</span>
+        </div>
       ))}
     </div>
   );
@@ -199,10 +197,10 @@ export default function Home() {
         event.currentTarget.style.setProperty("--parallax-y", `${y}px`);
       }}
     >
-      <div aria-hidden className="absolute inset-0 -z-20">
+      <div aria-hidden className="absolute inset-0 z-0">
         <div className="absolute inset-0 bg-[linear-gradient(to_right,color-mix(in_oklch,var(--border)_55%,transparent)_1px,transparent_1px),linear-gradient(to_bottom,color-mix(in_oklch,var(--border)_55%,transparent)_1px,transparent_1px)] bg-[size:66px_66px] opacity-30" />
       </div>
-      <div aria-hidden className="absolute inset-0 -z-10">
+      <div aria-hidden className="absolute inset-0 z-[1]">
         <ParticleField />
       </div>
 
@@ -245,7 +243,7 @@ export default function Home() {
         </div>
       </header>
 
-      <main className="mx-auto flex w-full max-w-6xl flex-col gap-24 px-5 pb-24 pt-14 lg:px-8">
+      <main className="relative z-10 mx-auto flex w-full max-w-6xl flex-col gap-24 px-5 pb-24 pt-14 lg:px-8">
         <section className="relative grid items-center gap-10 py-10 lg:grid-cols-[1.1fr_0.9fr]">
           <Reveal from="up" className="space-y-6">
             <p className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
@@ -450,7 +448,11 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="overflow-hidden rounded-3xl border border-border/80 p-8 text-center glass sm:p-14">
+        <section className="relative overflow-hidden rounded-3xl border border-border/80 p-8 text-center glass sm:p-14">
+          <div
+            aria-hidden
+            className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_20%_20%,rgba(190,140,255,0.22),transparent_46%),radial-gradient(circle_at_80%_70%,rgba(52,211,153,0.16),transparent_48%),radial-gradient(circle_at_50%_100%,rgba(251,191,36,0.14),transparent_44%)]"
+          />
           <h2 className="text-balance text-3xl font-semibold tracking-tight sm:text-4xl">
             Stop Launching in Just One Language.
           </h2>

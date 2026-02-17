@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { authClient } from "@/lib/auth-client";
 
+const loginParticleTones = ["bg-primary/30", "bg-foreground/20", "bg-emerald-400/20"];
+
 function useTheme() {
   const [isDark, setIsDark] = useState(() => {
     if (typeof window === "undefined") return true;
@@ -30,16 +32,26 @@ function useTheme() {
 }
 
 function MinimalParticleBackground() {
+  const pseudo = (value: number) => {
+    const x = Math.sin(value * 12.9898) * 43758.5453;
+    return x - Math.floor(x);
+  };
+
   const particles = useMemo(
     () =>
-      Array.from({ length: 18 }).map((_, index) => ({
-        id: index,
-        left: (index * 31) % 100,
-        top: (index * 23) % 100,
-        size: index % 3 === 0 ? 4 : 3,
-        delay: (index % 6) * 0.5,
-        duration: 12 + (index % 5),
-      })),
+      Array.from({ length: 130 }).map((_, index) => {
+        const duration = 11 + pseudo(index + 8) * 10;
+        return {
+          id: index,
+          left: -15 - pseudo(index + 13) * 30,
+          top: pseudo(index + 21) * 100,
+          size: 1.5 + pseudo(index + 33) * 2.6,
+          delay: pseudo(index + 48) * duration,
+          duration,
+          driftY: (pseudo(index + 59) - 0.5) * 20,
+          tone: loginParticleTones[index % loginParticleTones.length],
+        };
+      }),
     []
   );
 
@@ -52,15 +64,17 @@ function MinimalParticleBackground() {
       {particles.map((particle) => (
         <span
           key={particle.id}
-          className="particle-drift absolute rounded-full bg-primary/24"
+          className={`absolute rounded-full ${particle.tone}`}
           style={{
+            "--dy": `${particle.driftY}px`,
             left: `${particle.left}%`,
             top: `${particle.top}%`,
             width: `${particle.size}px`,
             height: `${particle.size}px`,
-            animationDelay: `${particle.delay}s`,
-            animationDuration: `${particle.duration}s`,
-          }}
+            boxShadow: "0 0 8px rgba(190,140,255,0.16)",
+            animation: `particleAcross ${particle.duration}s linear ${particle.delay * -1}s infinite, softPulse 3.2s ease-in-out ${particle.delay}s infinite`,
+            opacity: 0.34,
+          } as React.CSSProperties}
         />
       ))}
     </div>
@@ -94,10 +108,10 @@ export default function LoginPage() {
         event.currentTarget.style.setProperty("--parallax-y", `${y}px`);
       }}
     >
-      <div aria-hidden className="absolute inset-0 -z-20">
+      <div aria-hidden className="absolute inset-0 z-0">
         <div className="absolute inset-0 bg-[linear-gradient(to_right,color-mix(in_oklch,var(--border)_55%,transparent)_1px,transparent_1px),linear-gradient(to_bottom,color-mix(in_oklch,var(--border)_55%,transparent)_1px,transparent_1px)] bg-[size:62px_62px] opacity-25" />
       </div>
-      <div className="absolute inset-0 -z-10">
+      <div className="absolute inset-0 z-[1]">
         <MinimalParticleBackground />
       </div>
 
@@ -107,7 +121,7 @@ export default function LoginPage() {
         </Button>
       </div>
 
-      <Card className="glass w-full max-w-md rounded-3xl border-border/80">
+      <Card className="glass relative z-10 w-full max-w-md rounded-3xl border-border/80">
         <CardHeader>
           <div className="mb-2 inline-flex w-fit items-center gap-2 rounded-full border border-primary/25 bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
             <Sparkles className="size-3" />

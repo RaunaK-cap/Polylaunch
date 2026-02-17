@@ -122,8 +122,6 @@
 
   body {
     @apply bg-background text-foreground;
-    background-image: radial-gradient(circle at 20% 15%, rgb(168 85 247 / 0.08), transparent 35%),
-      radial-gradient(circle at 80% 0%, rgb(255 255 255 / 0.03), transparent 38%);
   }
 }
 
@@ -155,6 +153,60 @@
   }
   to {
     transform: translate3d(30px, -20px, 0);
+  }
+}
+
+@keyframes wander {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  25% {
+    transform: translate3d(calc(var(--dx) * 0.35), calc(var(--dy) * -0.25), 0);
+  }
+  50% {
+    transform: translate3d(calc(var(--dx) * 0.75), calc(var(--dy) * 0.65), 0);
+  }
+  75% {
+    transform: translate3d(calc(var(--dx) * -0.2), calc(var(--dy) * 0.35), 0);
+  }
+  100% {
+    transform: translate3d(var(--dx), var(--dy), 0);
+  }
+}
+
+@keyframes particleAcross {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(160vw, var(--dy), 0);
+  }
+}
+
+@keyframes globePan {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes orbitSpin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes routeFlow {
+  0% {
+    stroke-dashoffset: 0;
+  }
+  100% {
+    stroke-dashoffset: -220;
   }
 }
 
@@ -252,13 +304,23 @@
   animation: drift 14s ease-in-out infinite alternate;
 }
 
+.animate-globe-pan {
+  animation: globePan 16s linear infinite;
+}
+
+.animate-orbit-spin {
+  animation: orbitSpin 14s linear infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .typing-track,
   .cursor,
   .float-slow,
   .float-delay,
   .particle-drift,
-  .animated-gradient {
+  .animated-gradient,
+  .animate-globe-pan,
+  .animate-orbit-spin {
     animation: none;
   }
 
